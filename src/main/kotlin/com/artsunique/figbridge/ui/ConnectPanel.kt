@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
 import java.awt.BorderLayout
 import java.awt.Dimension
+import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.*
 
@@ -52,19 +53,23 @@ class ConnectPanel(
             border = JBUI.Borders.emptyTop(12)
         }
 
-        val connectButton = JButton("Connect Figma").apply {
-            alignmentX = CENTER_ALIGNMENT
-            addActionListener { startOAuthFlow() }
+        // Two buttons side by side
+        val patButton = JButton("Login with Personal Access Token").apply {
+            addActionListener { showPatDialog() }
         }
 
-        // Divider
+        val buttonRow = JPanel(FlowLayout(FlowLayout.CENTER, 8, 0)).apply {
+            alignmentX = CENTER_ALIGNMENT
+            add(patButton)
+        }
+
+        // URL input
         val orLabel = JBLabel("or paste a Figma design link").apply {
             alignmentX = CENTER_ALIGNMENT
             foreground = JBUI.CurrentTheme.Label.disabledForeground()
             border = JBUI.Borders.empty(16, 0, 8, 0)
         }
 
-        // URL input
         val urlField = JBTextField().apply {
             emptyText.text = "https://www.figma.com/design/..."
             alignmentX = CENTER_ALIGNMENT
@@ -103,25 +108,21 @@ class ConnectPanel(
             border = JBUI.Borders.emptyTop(20)
         }
 
-        val patLink = JBLabel("Use Personal Access Token").apply {
+        val oauthLabel = JBLabel("Login with Figma \u2014 coming soon").apply {
             alignmentX = CENTER_ALIGNMENT
             foreground = JBUI.CurrentTheme.Label.disabledForeground()
-            cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
             font = font.deriveFont(11f)
             border = JBUI.Borders.emptyTop(16)
-            addMouseListener(object : java.awt.event.MouseAdapter() {
-                override fun mouseClicked(e: java.awt.event.MouseEvent) { showPatDialog() }
-            })
         }
 
         contentPanel.add(titleLabel)
         contentPanel.add(descLabel)
         contentPanel.add(Box.createVerticalStrut(20))
-        contentPanel.add(connectButton)
+        contentPanel.add(buttonRow)
         contentPanel.add(orLabel)
         contentPanel.add(urlRow)
         contentPanel.add(trialLabel)
-        contentPanel.add(patLink)
+        contentPanel.add(oauthLabel)
 
         contentPanel.revalidate()
         contentPanel.repaint()
@@ -130,7 +131,6 @@ class ConnectPanel(
     /** User pasted a Figma URL — authenticate if needed, then open file */
     private fun connectWithUrl(fileKey: String) {
         if (FigmaAuth.getInstance().isAuthenticated()) {
-            // Already has a token — verify and open
             showConnecting()
             scope.launch(Dispatchers.IO) {
                 val result = FigmaClient.getInstance().getMe()
@@ -141,60 +141,15 @@ class ConnectPanel(
                                 ?: onConnected(result.data)
                         }
                         is FigmaResult.Error -> {
-                            // Token expired — re-authenticate via OAuth
                             FigmaAuth.getInstance().clearToken()
-                            startOAuthFlowThenOpenFile(fileKey)
+                            showDisconnected()
+                            Messages.showErrorDialog(project, "Token expired. Please log in again.", "Connection Failed")
                         }
                     }
                 }
             }
         } else {
-            // Not authenticated — start OAuth, then open file
-            startOAuthFlowThenOpenFile(fileKey)
-        }
-    }
-
-    /** Start OAuth flow, then open the file directly after login */
-    private fun startOAuthFlowThenOpenFile(fileKey: String) {
-        showConnecting()
-        scope.launch(Dispatchers.IO) {
-            FigmaOAuth.startOAuthFlow(
-                onSuccess = { token ->
-                    scope.launch(Dispatchers.IO) {
-                        FigBridgeSettings.getInstance().authMethod = AuthMethod.OAUTH
-                        FigmaAuth.getInstance().storeToken(token)
-                        val result = FigmaClient.getInstance().getMe()
-                        launch(Dispatchers.Swing) {
-                            when (result) {
-                                is FigmaResult.Success -> {
-                                    onConnectedWithFile?.invoke(result.data, fileKey)
-                                        ?: onConnected(result.data)
-                                }
-                                is FigmaResult.Error -> {
-                                    FigmaAuth.getInstance().clearToken()
-                                    FigBridgeSettings.getInstance().authMethod = AuthMethod.NONE
-                                    showDisconnected()
-                                    Messages.showErrorDialog(project, "Could not connect: ${result.message}", "Connection Failed")
-                                }
-                            }
-                        }
-                    }
-                },
-                onError = { error ->
-                    scope.launch(Dispatchers.Swing) {
-                        showDisconnected()
-                        val usePat = Messages.showYesNoDialog(
-                            project,
-                            "$error\n\nWould you like to use a Personal Access Token instead?",
-                            "OAuth Error",
-                            "Use Token",
-                            "Cancel",
-                            null,
-                        )
-                        if (usePat == Messages.YES) showPatDialog()
-                    }
-                },
-            )
+            showPatDialog(fileKey)
         }
     }
 
@@ -209,47 +164,7 @@ class ConnectPanel(
         contentPanel.repaint()
     }
 
-    private fun startOAuthFlow() {
-        showConnecting()
-        scope.launch(Dispatchers.IO) {
-            FigmaOAuth.startOAuthFlow(
-                onSuccess = { token ->
-                    scope.launch(Dispatchers.IO) {
-                        FigBridgeSettings.getInstance().authMethod = AuthMethod.OAUTH
-                        FigmaAuth.getInstance().storeToken(token)
-                        val result = FigmaClient.getInstance().getMe()
-                        launch(Dispatchers.Swing) {
-                            when (result) {
-                                is FigmaResult.Success -> onConnected(result.data)
-                                is FigmaResult.Error -> {
-                                    FigmaAuth.getInstance().clearToken()
-                                    FigBridgeSettings.getInstance().authMethod = AuthMethod.NONE
-                                    showDisconnected()
-                                    Messages.showErrorDialog(project, "Could not connect: ${result.message}", "Connection Failed")
-                                }
-                            }
-                        }
-                    }
-                },
-                onError = { error ->
-                    scope.launch(Dispatchers.Swing) {
-                        showDisconnected()
-                        val usePat = Messages.showYesNoDialog(
-                            project,
-                            "$error\n\nWould you like to use a Personal Access Token instead?",
-                            "OAuth Error",
-                            "Use Token",
-                            "Cancel",
-                            null,
-                        )
-                        if (usePat == Messages.YES) showPatDialog()
-                    }
-                },
-            )
-        }
-    }
-
-    private fun showPatDialog() {
+    private fun showPatDialog(pendingFileKey: String? = null) {
         val token = Messages.showInputDialog(
             project,
             "Paste your Figma Personal Access Token.\n\nGenerate one at figma.com/developers \u2192 Personal Access Tokens",
@@ -265,7 +180,14 @@ class ConnectPanel(
             val result = FigmaClient.getInstance().getMe()
             launch(Dispatchers.Swing) {
                 when (result) {
-                    is FigmaResult.Success -> onConnected(result.data)
+                    is FigmaResult.Success -> {
+                        if (pendingFileKey != null) {
+                            onConnectedWithFile?.invoke(result.data, pendingFileKey)
+                                ?: onConnected(result.data)
+                        } else {
+                            onConnected(result.data)
+                        }
+                    }
                     is FigmaResult.Error -> {
                         FigmaAuth.getInstance().clearToken()
                         FigBridgeSettings.getInstance().authMethod = AuthMethod.NONE
