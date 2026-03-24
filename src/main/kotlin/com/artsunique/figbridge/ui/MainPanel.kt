@@ -109,20 +109,16 @@ class MainPanel(
         val rightIcons = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.X_AXIS)
         }
-        val helpLink = JBLabel("?").apply {
-            font = font.deriveFont(Font.BOLD, 13f)
-            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+        val helpLink = JBLabel("Help").apply {
+            foreground = JBUI.CurrentTheme.Link.Foreground.ENABLED
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-            toolTipText = "Help"
             addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent) { showHelp() }
             })
         }
-        val settingsLink = JBLabel("\u2699").apply {
-            font = font.deriveFont(14f)
-            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+        val settingsLink = JBLabel("Settings").apply {
+            foreground = JBUI.CurrentTheme.Link.Foreground.ENABLED
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-            toolTipText = "Settings"
             addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent) { showSettings() }
             })
