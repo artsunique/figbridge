@@ -105,7 +105,7 @@ object FigmaOAuth {
         }
     }
 
-    private suspend fun exchangeCode(
+    internal suspend fun exchangeCode(
         code: String,
         clientId: String,
         clientSecret: String,
@@ -133,7 +133,7 @@ object FigmaOAuth {
         }
     }
 
-    private fun waitForCallback(server: ServerSocket): String? {
+    internal fun waitForCallback(server: ServerSocket): String? {
         val socket = server.accept()
         val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
         val requestLine = reader.readLine() ?: ""
@@ -161,7 +161,7 @@ object FigmaOAuth {
         return code
     }
 
-    private fun extractCode(requestLine: String): String? {
+    internal fun extractCode(requestLine: String): String? {
         val match = Regex("code=([^&\\s]+)").find(requestLine)
         return match?.groupValues?.get(1)
     }
@@ -170,7 +170,7 @@ object FigmaOAuth {
      * Open URL via OS command — bypasses Java's URI class which can
      * re-encode characters differently than the browser expects.
      */
-    private fun openUrl(url: String) {
+    internal fun openUrl(url: String) {
         val os = System.getProperty("os.name").lowercase()
         val command = when {
             os.contains("mac") -> arrayOf("open", url)

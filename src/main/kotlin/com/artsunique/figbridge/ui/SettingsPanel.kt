@@ -118,7 +118,7 @@ class SettingsPanel(
         }
     }
 
-    private fun save() {
+    internal fun save() {
         val state = settings.state
         state.assetDir = assetDirField.text.trim().ifEmpty { "images" }
         state.tokenFile = tokenFileField.text.trim().ifEmpty { "tokens.css" }
