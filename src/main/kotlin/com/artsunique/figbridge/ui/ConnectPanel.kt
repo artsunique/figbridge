@@ -103,6 +103,17 @@ class ConnectPanel(
             border = JBUI.Borders.emptyTop(20)
         }
 
+        val patLink = JBLabel("Use Personal Access Token").apply {
+            alignmentX = CENTER_ALIGNMENT
+            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+            cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
+            font = font.deriveFont(11f)
+            border = JBUI.Borders.emptyTop(16)
+            addMouseListener(object : java.awt.event.MouseAdapter() {
+                override fun mouseClicked(e: java.awt.event.MouseEvent) { showPatDialog() }
+            })
+        }
+
         contentPanel.add(titleLabel)
         contentPanel.add(descLabel)
         contentPanel.add(Box.createVerticalStrut(20))
@@ -110,6 +121,7 @@ class ConnectPanel(
         contentPanel.add(orLabel)
         contentPanel.add(urlRow)
         contentPanel.add(trialLabel)
+        contentPanel.add(patLink)
 
         contentPanel.revalidate()
         contentPanel.repaint()
@@ -171,7 +183,15 @@ class ConnectPanel(
                 onError = { error ->
                     scope.launch(Dispatchers.Swing) {
                         showDisconnected()
-                        Messages.showErrorDialog(project, error, "OAuth Error")
+                        val usePat = Messages.showYesNoDialog(
+                            project,
+                            "$error\n\nWould you like to use a Personal Access Token instead?",
+                            "OAuth Error",
+                            "Use Token",
+                            "Cancel",
+                            null,
+                        )
+                        if (usePat == Messages.YES) showPatDialog()
                     }
                 },
             )
@@ -214,10 +234,46 @@ class ConnectPanel(
                 onError = { error ->
                     scope.launch(Dispatchers.Swing) {
                         showDisconnected()
-                        Messages.showErrorDialog(project, error, "OAuth Error")
+                        val usePat = Messages.showYesNoDialog(
+                            project,
+                            "$error\n\nWould you like to use a Personal Access Token instead?",
+                            "OAuth Error",
+                            "Use Token",
+                            "Cancel",
+                            null,
+                        )
+                        if (usePat == Messages.YES) showPatDialog()
                     }
                 },
             )
+        }
+    }
+
+    private fun showPatDialog() {
+        val token = Messages.showInputDialog(
+            project,
+            "Paste your Figma Personal Access Token.\n\nGenerate one at figma.com/developers \u2192 Personal Access Tokens",
+            "Figma Personal Access Token",
+            null,
+        )
+        if (token.isNullOrBlank()) return
+
+        showConnecting()
+        scope.launch(Dispatchers.IO) {
+            FigBridgeSettings.getInstance().authMethod = AuthMethod.PAT
+            FigmaAuth.getInstance().storeToken(token)
+            val result = FigmaClient.getInstance().getMe()
+            launch(Dispatchers.Swing) {
+                when (result) {
+                    is FigmaResult.Success -> onConnected(result.data)
+                    is FigmaResult.Error -> {
+                        FigmaAuth.getInstance().clearToken()
+                        FigBridgeSettings.getInstance().authMethod = AuthMethod.NONE
+                        showDisconnected()
+                        Messages.showErrorDialog(project, "Could not connect: ${result.message}", "Connection Failed")
+                    }
+                }
+            }
         }
     }
 }
