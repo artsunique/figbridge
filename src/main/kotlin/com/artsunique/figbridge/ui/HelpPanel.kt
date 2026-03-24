@@ -122,7 +122,7 @@ class HelpPanel(
         content.add(bullet("Code generation and asset export require a Pro license"))
         content.add(spacer())
 
-        val versionLabel = JBLabel("FigBridge v1.0.0 \u00b7 arts-unique.com").apply {
+        val versionLabel = JBLabel("FigBridge v1.0.1 \u00b7 arts-unique.com").apply {
             foreground = JBUI.CurrentTheme.Label.disabledForeground()
             alignmentX = LEFT_ALIGNMENT
         }

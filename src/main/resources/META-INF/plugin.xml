@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.artsunique.figbridge</id>
     <name>FigBridge — Figma to Code</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <vendor email="info@artsunique.de" url="https://arts-unique.com">arts-unique</vendor>
 
     <description><![CDATA[
@@ -46,7 +46,7 @@ Code generation and asset export require a Pro license.</p>
     ]]></description>
 
     <change-notes><![CDATA[
-<h3>1.0.0</h3>
+<h3>1.0.1</h3>
 <ul>
     <li>Initial release</li>
     <li>Figma OAuth login and Personal Access Token authentication</li>
