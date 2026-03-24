@@ -64,8 +64,8 @@ class FigBridgeSettings : PersistentStateComponent<FigBridgeSettings.State> {
     }
 
     companion object {
-        const val DEFAULT_CLIENT_ID = "rPEaoZIoMKFo89oENin7LH"
-        const val DEFAULT_CLIENT_SECRET = "fmbQT5yzLE67pBcRgiDl3PSmd6N7YX"
+        const val DEFAULT_CLIENT_ID = ""
+        const val DEFAULT_CLIENT_SECRET = ""
 
         fun getInstance(): FigBridgeSettings =
             ApplicationManager.getApplication().getService(FigBridgeSettings::class.java)
