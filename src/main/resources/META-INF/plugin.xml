@@ -1,12 +1,64 @@
 <idea-plugin>
     <id>com.artsunique.figbridge</id>
-    <name>FigBridge</name>
-    <vendor url="https://arts-unique.com">arts-unique</vendor>
+    <name>FigBridge — Figma to Code</name>
+    <version>1.0.0</version>
+    <vendor email="info@artsunique.de" url="https://arts-unique.com">arts-unique</vendor>
 
     <description><![CDATA[
-        Generate Tailwind CSS or Custom CSS/HTML code from Figma designs,
-        directly in your JetBrains IDE.
+<h2>FigBridge — Generate production-ready code from Figma designs</h2>
+
+<p>FigBridge connects your JetBrains IDE directly to Figma and generates clean,
+semantic HTML with either <b>Tailwind CSS v4</b> or <b>Custom CSS (BEM)</b> from any frame
+in your Figma files.</p>
+
+<h3>Features</h3>
+<ul>
+    <li><b>Figma OAuth Login</b> — One-click browser login, no token copy-paste needed</li>
+    <li><b>Tailwind CSS v4</b> — Generates utility classes using the latest Tailwind syntax</li>
+    <li><b>Custom CSS with BEM</b> — Generates clean HTML + separate CSS with BEM-style class names</li>
+    <li><b>Semantic HTML</b> — Detects headers, navs, sections, buttons, inputs, links from Figma layer names</li>
+    <li><b>Auto Layout → Flexbox</b> — Converts Figma Auto Layout to flex, gap, padding, alignment</li>
+    <li><b>Flex Wrap</b> — Supports wrapped Auto Layouts with row/column gap</li>
+    <li><b>Absolute Positioning</b> — Non-Auto-Layout frames position children with top/left</li>
+    <li><b>Design Tokens</b> — Import Figma Variables as CSS Custom Properties (@theme or :root)</li>
+    <li><b>Asset Export</b> — Downloads images as PNG/WebP and icons as SVG, deduplicated by content</li>
+    <li><b>Google Fonts</b> — Auto-detects custom fonts and generates the link tag</li>
+    <li><b>Tailwind Snap</b> — Convert arbitrary values (e.g. text-[18px]) to standard Tailwind classes</li>
+    <li><b>Frame Preview</b> — Browse pages and frames with thumbnail preview</li>
+    <li><b>Keyboard Shortcuts</b> — Ctrl+Alt+F to generate, Ctrl+Alt+R to refresh</li>
+</ul>
+
+<h3>Getting Started</h3>
+<ol>
+    <li>Open the <b>FigBridge</b> tool window (right sidebar)</li>
+    <li>Click <b>Connect Figma</b> to log in via OAuth, or use a Personal Access Token</li>
+    <li>Paste a Figma file URL or select a recent file</li>
+    <li>Select a frame and click <b>Generate Code</b></li>
+    <li>Copy the code or export assets to your project</li>
+</ol>
+
+<h3>Supported IDEs</h3>
+<p>PhpStorm, WebStorm, IntelliJ IDEA, and all IntelliJ Platform IDEs (2025.1+)</p>
+
+<h3>Trial</h3>
+<p>14-day free trial with full access. After the trial, preview and inspect remain free.
+Code generation and asset export require a Pro license.</p>
     ]]></description>
+
+    <change-notes><![CDATA[
+<h3>1.0.0</h3>
+<ul>
+    <li>Initial release</li>
+    <li>Figma OAuth login and Personal Access Token authentication</li>
+    <li>Tailwind CSS v4 and Custom CSS (BEM) code generation</li>
+    <li>Design token sync from Figma Variables</li>
+    <li>Asset export (PNG, WebP, SVG)</li>
+    <li>Frame tree browser with thumbnail preview</li>
+    <li>Google Fonts auto-detection</li>
+    <li>Tailwind Snap for converting arbitrary values</li>
+    <li>Keyboard shortcuts (Ctrl+Alt+F, Ctrl+Alt+R)</li>
+</ul>
+    ]]></change-notes>
 
     <!-- Compatible with all IntelliJ Platform IDEs -->
     <depends>com.intellij.modules.platform</depends>

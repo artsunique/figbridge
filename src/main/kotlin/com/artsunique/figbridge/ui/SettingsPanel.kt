@@ -20,7 +20,7 @@ class SettingsPanel(
 
     private val assetDirField = JBTextField(settings.state.assetDir)
     private val tokenFileField = JBTextField(settings.state.tokenFile)
-    private val codeModeCombo = JComboBox(arrayOf("CSS", "Tailwind")).apply {
+    private val codeModeCombo = JComboBox(arrayOf("Custom CSS (BEM)", "Tailwind CSS v4")).apply {
         selectedIndex = when (settings.codeMode) {
             CodeMode.CUSTOM_CSS -> 0
             CodeMode.TAILWIND -> 1
@@ -55,26 +55,27 @@ class SettingsPanel(
             border = JBUI.Borders.empty(8, 0)
         }
 
+        // --- Code Generation ---
+        form.add(sectionLabel("Code Generation"))
+        form.add(buildField("Default Mode", codeModeCombo))
+        form.add(hint("Tailwind generates utility classes. Custom CSS generates HTML + separate CSS with BEM naming."))
+        form.add(Box.createVerticalStrut(12))
+
+        // --- Paths ---
+        form.add(sectionLabel("Project Paths"))
         form.add(buildField("Asset Directory", assetDirField))
-        form.add(Box.createVerticalStrut(12))
+        form.add(hint("Relative path for exported images and icons (e.g. images, assets/img)"))
+        form.add(Box.createVerticalStrut(8))
         form.add(buildField("Token File", tokenFileField))
-        form.add(Box.createVerticalStrut(12))
-        form.add(buildField("Default Code Mode", codeModeCombo))
+        form.add(hint("Output file for design tokens (e.g. tokens.css, src/tokens.css)"))
         form.add(Box.createVerticalStrut(24))
 
-        val oauthTitle = JBLabel("OAuth (optional)").apply {
-            font = font.deriveFont(Font.BOLD, 12f)
-            alignmentX = LEFT_ALIGNMENT
-        }
-        val oauthHint = JBLabel("Register a Figma app to enable OAuth login.").apply {
-            foreground = JBUI.CurrentTheme.Label.disabledForeground()
-            alignmentX = LEFT_ALIGNMENT
-            border = JBUI.Borders.emptyBottom(8)
-        }
-        form.add(oauthTitle)
-        form.add(oauthHint)
+        // --- OAuth ---
+        form.add(sectionLabel("OAuth Credentials (optional)"))
+        form.add(hint("FigBridge comes with built-in OAuth. Only change these if you have your own Figma app."))
+        form.add(Box.createVerticalStrut(4))
         form.add(buildField("Client ID", oauthClientIdField))
-        form.add(Box.createVerticalStrut(12))
+        form.add(Box.createVerticalStrut(8))
         form.add(buildField("Client Secret", oauthClientSecretField))
 
         // Save button
@@ -87,6 +88,23 @@ class SettingsPanel(
 
         add(header, BorderLayout.NORTH)
         add(JScrollPane(form).apply { border = JBUI.Borders.empty() }, BorderLayout.CENTER)
+    }
+
+    private fun sectionLabel(title: String): JBLabel {
+        return JBLabel(title).apply {
+            font = font.deriveFont(Font.BOLD, 12f)
+            alignmentX = LEFT_ALIGNMENT
+            border = JBUI.Borders.empty(0, 0, 6, 0)
+        }
+    }
+
+    private fun hint(text: String): JBLabel {
+        return JBLabel(text).apply {
+            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+            font = font.deriveFont(11f)
+            alignmentX = LEFT_ALIGNMENT
+            border = JBUI.Borders.empty(2, 0, 4, 0)
+        }
     }
 
     private fun buildField(label: String, component: JComponent): JPanel {
