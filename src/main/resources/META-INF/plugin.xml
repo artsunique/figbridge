@@ -1,0 +1,40 @@
+<idea-plugin>
+    <id>com.artsunique.figbridge</id>
+    <name>FigBridge</name>
+    <vendor url="https://arts-unique.com">arts-unique</vendor>
+
+    <description><![CDATA[
+        Generate Tailwind CSS or Custom CSS/HTML code from Figma designs,
+        directly in your JetBrains IDE.
+    ]]></description>
+
+    <!-- Compatible with all IntelliJ Platform IDEs -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow
+            id="FigBridge"
+            anchor="right"
+            factoryClass="com.artsunique.figbridge.ui.FigBridgeToolWindowFactory"
+        />
+        <notificationGroup id="FigBridge" displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <group id="FigBridge.Actions" text="FigBridge" description="FigBridge actions">
+            <action id="FigBridge.GenerateCode"
+                    class="com.artsunique.figbridge.actions.GenerateCodeAction"
+                    text="Generate Code"
+                    description="Open FigBridge and generate code from selected Figma frame">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F"/>
+            </action>
+            <action id="FigBridge.Refresh"
+                    class="com.artsunique.figbridge.actions.RefreshAction"
+                    text="Refresh"
+                    description="Refresh the current Figma file">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt R"/>
+            </action>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </group>
+    </actions>
+</idea-plugin>
