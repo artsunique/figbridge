@@ -54,12 +54,16 @@ class ConnectPanel(
         }
 
         // Two buttons side by side
-        val patButton = JButton("Login with Personal Access Token").apply {
+        val oauthButton = JButton("Login with Figma").apply {
+            addActionListener { startOAuthFlow() }
+        }
+        val patButton = JButton("Login with Token").apply {
             addActionListener { showPatDialog() }
         }
 
         val buttonRow = JPanel(FlowLayout(FlowLayout.CENTER, 8, 0)).apply {
             alignmentX = CENTER_ALIGNMENT
+            add(oauthButton)
             add(patButton)
         }
 
@@ -108,7 +112,7 @@ class ConnectPanel(
             border = JBUI.Borders.emptyTop(20)
         }
 
-        val oauthLabel = JBLabel("Login with Figma \u2014 coming soon").apply {
+        val oauthLabel = JBLabel("Figma OAuth login requires team membership \u2014 public access coming soon").apply {
             alignmentX = CENTER_ALIGNMENT
             foreground = JBUI.CurrentTheme.Label.disabledForeground()
             font = font.deriveFont(11f)
@@ -196,6 +200,38 @@ class ConnectPanel(
                     }
                 }
             }
+        }
+    }
+
+    private fun startOAuthFlow() {
+        showConnecting()
+        scope.launch(Dispatchers.IO) {
+            FigmaOAuth.startOAuthFlow(
+                onSuccess = { token ->
+                    scope.launch(Dispatchers.IO) {
+                        FigBridgeSettings.getInstance().authMethod = AuthMethod.OAUTH
+                        FigmaAuth.getInstance().storeToken(token)
+                        val result = FigmaClient.getInstance().getMe()
+                        launch(Dispatchers.Swing) {
+                            when (result) {
+                                is FigmaResult.Success -> onConnected(result.data)
+                                is FigmaResult.Error -> {
+                                    FigmaAuth.getInstance().clearToken()
+                                    FigBridgeSettings.getInstance().authMethod = AuthMethod.NONE
+                                    showDisconnected()
+                                    Messages.showErrorDialog(project, "Could not connect: ${result.message}", "Connection Failed")
+                                }
+                            }
+                        }
+                    }
+                },
+                onError = { error ->
+                    scope.launch(Dispatchers.Swing) {
+                        showDisconnected()
+                        Messages.showErrorDialog(project, "$error\n\nTry using a Personal Access Token instead.", "OAuth Error")
+                    }
+                },
+            )
         }
     }
 }
