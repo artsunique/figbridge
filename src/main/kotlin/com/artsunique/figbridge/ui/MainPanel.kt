@@ -13,6 +13,7 @@ import com.artsunique.figbridge.generator.TokenImporter
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.TreeSpeedSearch
+import com.intellij.ui.SpeedSearchComparator
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
@@ -77,13 +78,7 @@ class MainPanel(
         add(contentArea, BorderLayout.CENTER)
 
         setupTreeListener()
-        @Suppress("DEPRECATION")
-        TreeSpeedSearch(tree) { path ->
-            (path.lastPathComponent as? DefaultMutableTreeNode)?.let { node ->
-                val obj = node.userObject
-                if (obj is FigmaNode) obj.name else obj.toString()
-            } ?: ""
-        }
+        TreeSpeedSearch.installOn(tree)
 
         showFilePicker()
     }
