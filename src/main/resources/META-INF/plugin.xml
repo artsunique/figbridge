@@ -67,6 +67,7 @@ Code generation and asset export require a Pro license.</p>
         <toolWindow
             id="FigBridge"
             anchor="right"
+            icon="/icons/pluginIcon.svg"
             factoryClass="com.artsunique.figbridge.ui.FigBridgeToolWindowFactory"
         />
         <notificationGroup id="FigBridge" displayType="BALLOON"/>
