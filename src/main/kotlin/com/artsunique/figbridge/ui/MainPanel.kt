@@ -300,6 +300,9 @@ class MainPanel(
         }
     }
 
+    /** Public entry point to load a file by key (used by ConnectPanel URL flow) */
+    fun loadFileByKey(fileKey: String) = loadFile(fileKey)
+
     private fun loadFile(fileKey: String) {
         currentFileKey = fileKey
         FigBridgeSettings.getInstance().state.lastFileKey = fileKey

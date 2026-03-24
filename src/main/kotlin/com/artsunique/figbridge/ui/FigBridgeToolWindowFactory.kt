@@ -23,12 +23,23 @@ class FigBridgeToolWindowFactory : ToolWindowFactory {
 
         fun showConnect() {
             wrapper.removeAll()
-            val connectPanel = ConnectPanel(project) { user ->
-                wrapper.removeAll()
-                wrapper.add(MainPanel(project, user) { showConnect() }, BorderLayout.CENTER)
-                wrapper.revalidate()
-                wrapper.repaint()
-            }
+            val connectPanel = ConnectPanel(
+                project,
+                onConnected = { user ->
+                    wrapper.removeAll()
+                    wrapper.add(MainPanel(project, user) { showConnect() }, BorderLayout.CENTER)
+                    wrapper.revalidate()
+                    wrapper.repaint()
+                },
+                onConnectedWithFile = { user, fileKey ->
+                    wrapper.removeAll()
+                    val mainPanel = MainPanel(project, user) { showConnect() }
+                    mainPanel.loadFileByKey(fileKey)
+                    wrapper.add(mainPanel, BorderLayout.CENTER)
+                    wrapper.revalidate()
+                    wrapper.repaint()
+                },
+            )
             wrapper.add(connectPanel, BorderLayout.CENTER)
             wrapper.revalidate()
             wrapper.repaint()
