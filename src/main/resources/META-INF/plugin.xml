@@ -60,6 +60,9 @@ Code generation and asset export require a Pro license.</p>
 </ul>
     ]]></change-notes>
 
+    <!-- Freemium license: free preview + inspect, paid code generation + asset export -->
+    <product-descriptor code="PFIGBRIDGE" release-date="20260325" release-version="10"/>
+
     <!-- Compatible with all IntelliJ Platform IDEs -->
     <depends>com.intellij.modules.platform</depends>
 

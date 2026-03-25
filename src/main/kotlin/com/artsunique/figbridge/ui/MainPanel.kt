@@ -3,6 +3,7 @@ package com.artsunique.figbridge.ui
 import com.artsunique.figbridge.api.*
 import com.artsunique.figbridge.config.CodeMode
 import com.artsunique.figbridge.config.FigBridgeSettings
+import com.artsunique.figbridge.config.LicenseChecker
 import com.artsunique.figbridge.config.TrialManager
 import com.artsunique.figbridge.generator.AssetExporter
 import com.artsunique.figbridge.generator.AssetInfo
@@ -93,11 +94,20 @@ class MainPanel(
             foreground = java.awt.Color(0x2E, 0xA0, 0x43) // Green
         }
 
+        val licensed = LicenseChecker.isLicensed()
         val trialDays = TrialManager.daysRemaining()
         val trialLabel = JBLabel(
-            if (trialDays > 0) "$trialDays days left" else "Trial expired"
+            when {
+                licensed -> "Pro"
+                trialDays > 0 -> "$trialDays days left"
+                else -> "Trial expired"
+            }
         ).apply {
-            foreground = if (trialDays <= 2) java.awt.Color(0xE0, 0x40, 0x40) else JBUI.CurrentTheme.Label.disabledForeground()
+            foreground = when {
+                licensed -> java.awt.Color(0x2E, 0xA0, 0x43)
+                trialDays <= 2 -> java.awt.Color(0xE0, 0x40, 0x40)
+                else -> JBUI.CurrentTheme.Label.disabledForeground()
+            }
             font = font.deriveFont(11f)
         }
 
@@ -188,12 +198,12 @@ class MainPanel(
         }
 
         // Action bar
-        val trialExpired = TrialManager.isExpired()
-        val generateButton = JButton(if (trialExpired) "Generate Code (Trial Expired)" else "Generate Code").apply {
+        val noProAccess = !LicenseChecker.hasProAccess()
+        val generateButton = JButton(if (noProAccess) "Generate Code (Upgrade)" else "Generate Code").apply {
             isEnabled = false
-            if (trialExpired) toolTipText = "Upgrade to FigBridge Pro to continue generating code"
+            if (noProAccess) toolTipText = "Upgrade to FigBridge Pro to continue generating code"
             addActionListener {
-                if (TrialManager.isExpired()) {
+                if (!LicenseChecker.hasProAccess()) {
                     com.intellij.openapi.ui.Messages.showWarningDialog(
                         project,
                         "Your 14-day trial has expired.\nUpgrade to FigBridge Pro to continue generating code and exporting assets.\n\nPreview and inspect remain free.",
@@ -485,11 +495,11 @@ class MainPanel(
     }
 
     private fun exportAssets(fileKey: String, assets: List<AssetInfo>, projectDir: java.io.File, statusCallback: (String) -> Unit) {
-        if (TrialManager.isExpired()) {
+        if (!LicenseChecker.hasProAccess()) {
             com.intellij.openapi.ui.Messages.showWarningDialog(
                 project,
-                "Your 14-day trial has expired.\nUpgrade to FigBridge Pro to export assets.",
-                "Trial Expired",
+                "Upgrade to FigBridge Pro to export assets.\nYour trial has expired.",
+                "Upgrade Required",
             )
             return
         }

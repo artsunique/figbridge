@@ -34,8 +34,11 @@ object TrialManager {
         return (TRIAL_DAYS - elapsedDays).coerceAtLeast(0).toInt()
     }
 
-    /** Whether the trial has expired */
-    fun isExpired(): Boolean = daysRemaining() <= 0
+    /** Whether the trial has expired (licensed users are never expired) */
+    fun isExpired(): Boolean {
+        if (LicenseChecker.isLicensed()) return false
+        return daysRemaining() <= 0
+    }
 
     /** Whether the trial is active (not expired) */
     fun isActive(): Boolean = !isExpired()
